@@ -1,9 +1,7 @@
 package com.example.demo;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
+import java.lang.reflect.Array;
+import java.util.*;
 
 public class Game {
     public final int sizeX;
@@ -35,31 +33,81 @@ public class Game {
     }
 
     private void createField(int sizeX, int sizeY) {
-        for (int i = 0; i < sizeX; i++) {
-            for (int j = 0; j < sizeY; j++) {
+        for (int i = 0; i < sizeY; i++) {       //Iterates over Y axis (0-13 Standard)
+            for (int j = 0; j < sizeX; j++) {   //Iterates over X axis (0-20 Standard)
                 Field myField = new Field(i, j);
                 FieldList.add(myField);
             }
         }
-        scatterBombs();
+
+        assignFieldValues(scatterBombs());
     }
 
-    private void scatterBombs() {
+    private void assignFieldValues(ArrayList<Integer> bombPositions) {
+        for (int i = 0; i < bombPositions.size(); i++) {            //Iterates over every Bomb Position
+            Field current = FieldList.get(bombPositions.get(i));    //This is the bomb Field
+            ArrayList<Field> surroundingFields = new ArrayList<Field>();
+            surroundingFields = getSurroundingFields(current);      //The 3-8 Fields around the bomb
+            for (int j = 0; j < surroundingFields.size(); j++) {
+                if(surroundingFields.get(j).value >= 0) {           //If Field is not a bomb itself
+                    surroundingFields.get(j).value += 1;
+                }
+            }
+        }
+
+    }
+
+    private ArrayList<Field> getSurroundingFields(Field current) {
+
+        ArrayList<Field> currentXAxis = new ArrayList<Field>();
+        ArrayList<Field> surroundingFields = new ArrayList<Field>();
+
+        surroundingFields.add(getFieldOffsetFromThis(-1, -1, current));
+        surroundingFields.add(getFieldOffsetFromThis(-1, 0, current));
+        surroundingFields.add(getFieldOffsetFromThis(-1, 1, current));
+
+        surroundingFields.add(getFieldOffsetFromThis(0, -1, current));
+        surroundingFields.add(getFieldOffsetFromThis(0, 1, current));
+
+        surroundingFields.add(getFieldOffsetFromThis(1, -1, current));
+        surroundingFields.add(getFieldOffsetFromThis(1, 0, current));
+        surroundingFields.add(getFieldOffsetFromThis(1, 1, current));   //Fixme: Fix this up mby
+
+        surroundingFields.removeAll(Collections.singleton(null));
+        return surroundingFields;
+
+    }
+
+    private Field getFieldOffsetFromThis(int XOffset, int YOffset, Field currentTile){
+        for (int i = 0; i < FieldList.size(); i++) {
+            if((FieldList.get(i).coordX == (currentTile.coordX + XOffset))&&(FieldList.get(i).coordY == (currentTile.coordY + YOffset))) {
+                return FieldList.get(i);
+            }
+        }
+        return null;        //TODO: Is this legal?
+    }
+
+    private ArrayList<Integer> scatterBombs() {
         Random rand = new Random();
         ArrayList<Integer> bombPositions = new ArrayList<Integer>();
         for (int i = 0; i < bombCount; i++) {
             int current = rand.nextInt(sizeX*sizeY-1);
             bombPositions.add(current);
             Set<Integer> set = new HashSet<Integer>(bombPositions);     //I stole this part
-            if(set.size() < bombPositions.size()){
+            if(set.size() < bombPositions.size()){                      //Removes Duplicates from list
                 bombPositions.remove(bombPositions.size() - 1);
                 i--;
             }
         }
+
+
         System.out.println(bombPositions);
 
         for (int i = 0; i < bombPositions.size(); i++) {
-            FieldList.get(bombPositions.get(i)).isBomb = true;
+            FieldList.get(bombPositions.get(i)).value = -1;
         }
+
+
+        return bombPositions;
     }
 }

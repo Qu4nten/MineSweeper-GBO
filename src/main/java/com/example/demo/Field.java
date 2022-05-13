@@ -6,7 +6,7 @@ public class Field {
     public final int coordX;
     public final int coordY;
     public Button button;
-    public boolean isBomb;
+    public int value;
 
     Field(int x, int y){
         coordX = x;
@@ -15,17 +15,19 @@ public class Field {
         button.setOnAction(e-> FieldClicked());
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
+        value = 0;
     }
 
     private void FieldClicked() {
-        if(button.getText() == "x") {
+        /*if(button.getText() == "x") {
             button.setText("");
         }
         else{
                 button.setText("x");
         }
-        if(isBomb){
-            button.setText("O");
-        }
+        if(value == -1){
+            button.setText("-1");
+        }*/
+        button.setText(Integer.toString(value));
     }
 }
