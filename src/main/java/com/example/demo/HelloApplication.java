@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -38,6 +37,7 @@ public class HelloApplication extends Application {
         leaderScene = createSceneTwo();
         gamePrepScene = createSceneThree();
         gameScene = createSceneFour();
+        Field.openAll(); //TODO remove this once it's no longer needed
 
         stage.setTitle("MINESWEEPER");
         stage.setScene(mainScene);
