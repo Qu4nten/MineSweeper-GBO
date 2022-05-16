@@ -10,7 +10,8 @@ import java.util.Set;
 public class Field {
     private static ArrayList<Field> FieldList;
     private static int maxMultiOpen = 1;
-    private static Set<Field> openedFields;
+    private static Set<Field> openedFields; //I chose a Set here to prevent Duplicates
+    private static int openedThisTurn = 0;
     public final int coordX;
     public final int coordY;
     public Button button;
@@ -31,6 +32,12 @@ public class Field {
         cardinalNeigbours = new ArrayList<>();
         openedFields = new HashSet<>();
     }
+
+    private void fieldClicked() {       //FIXME Hack to make sure openedThisTurn can be reset, replace with better idea
+        fieldActivated();
+        openedThisTurn = 0;
+    }
+
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once
         float temp = FieldList.size() / 10;
         for (int i = 0;; i++) {
@@ -41,7 +48,8 @@ public class Field {
         }
     }
 
-    public void fieldClicked() {        //FIXME Change this back to private once open all is no longer needed // Or don't?
+    public void fieldActivated() {        //FIXME Change this back to private once open all is no longer needed // Or don't?
+        openedThisTurn++;
         if (value == -1){
             button.setText("X");
             button.setStyle("-fx-text-fill: red;-fx-font-weight: bold");
@@ -73,18 +81,18 @@ public class Field {
 
     private void openMass() {
         float share = (float)openedFields.size() / (float)FieldList.size();
-        if (share > 0.6){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
+        if (share > 0.5){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
             maxMultiOpen = 0;
             return;
         }
-        else if (openedFields.size() >= maxMultiOpen){
+        else if (openedThisTurn >= maxMultiOpen){      //TODO This needs to compare to a proper temp variable "(int) openedThisTurn"
             return;
         }
         else {
             for (int i = 0; i < cardinalNeigbours.size(); i++) {
                 if(cardinalNeigbours.get(i).value != -1){
                     if(!openedFields.contains(cardinalNeigbours.get(i))) {
-                        cardinalNeigbours.get(i).fieldClicked();
+                        cardinalNeigbours.get(i).fieldActivated();
                         openedFields.add(this);
                     }
                 }
@@ -145,7 +153,7 @@ public class Field {
     }
     public static void openAll(){
         for (int i = 0; i < FieldList.size(); i++) {
-            FieldList.get(i).fieldClicked();
+            FieldList.get(i).fieldActivated();
         }
     }
 }
