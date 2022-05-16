@@ -4,11 +4,13 @@ import javafx.scene.control.Button;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Field {
     private static ArrayList<Field> FieldList;
     private static int maxMultiOpen = 1;
-    private static int openedFields = 0;
+    private static Set<Field> openedFields;
     public final int coordX;
     public final int coordY;
     public Button button;
@@ -21,20 +23,15 @@ public class Field {
         coordY = y;
         button = new Button();
         button.setStyle("-fx-background-color: black");
-        button.setOnAction(e-> fieldClicked0());
+        button.setOnAction(e-> fieldClicked());
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
         value = 0;
         neigbours = new ArrayList<>();
         cardinalNeigbours = new ArrayList<>();
+        openedFields = new HashSet<>();
     }
-
-    private void fieldClicked0() {
-        openedFields = 0;       //FIXME Cringey hack I hate (that also doesn't work), also rename this to something sensible
-        fieldClicked();
-    }
-
-    public static void setMaxToOpen() {
+    public static void setMaxToOpen() {     //Sets how many Fields can be opened at once
         float temp = FieldList.size() / 10;
         for (int i = 0;; i++) {
             if (temp > (float)maxMultiOpen){
@@ -48,46 +45,48 @@ public class Field {
         if (value == -1){
             button.setText("X");
             button.setStyle("-fx-text-fill: red;-fx-font-weight: bold");
-            openedFields += 1;
+            openedFields.add(this);
         }
         else if (value == 0){
             button.setText("");
-            openedFields += 1;
+            openedFields.add(this);
             openMass();
         }
         else if (value == 1){
             button.setText("1");
             button.setStyle("-fx-text-fill: green");
-            openedFields += 1;
+            openedFields.add(this);
             openMass();
         }
         else if (value == 2){
             button.setText("2");
             button.setStyle("-fx-text-fill: yellow");
-            openedFields += 1;
+            openedFields.add(this);
         }
         else{
             button.setText(Integer.toString(value));
             button.setStyle("-fx-text-fill: orange");
-            openedFields += 1;
+            openedFields.add(this);
         }
         button.setStyle("-fx-background-color: white");
     }
 
     private void openMass() {
-        float share = (float)openedFields / (float)FieldList.size();
+        float share = (float)openedFields.size() / (float)FieldList.size();
         if (share > 0.6){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
             maxMultiOpen = 0;
             return;
         }
-        else if (openedFields >= maxMultiOpen){
+        else if (openedFields.size() >= maxMultiOpen){
             return;
         }
         else {
             for (int i = 0; i < cardinalNeigbours.size(); i++) {
                 if(cardinalNeigbours.get(i).value != -1){
-                    cardinalNeigbours.get(i).fieldClicked();
-                    openedFields++;
+                    if(!openedFields.contains(cardinalNeigbours.get(i))) {
+                        cardinalNeigbours.get(i).fieldClicked();
+                        openedFields.add(this);
+                    }
                 }
             }
         }
