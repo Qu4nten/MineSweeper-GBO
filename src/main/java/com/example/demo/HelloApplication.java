@@ -37,7 +37,7 @@ public class HelloApplication extends Application {
         leaderScene = createSceneTwo();
         gamePrepScene = createSceneThree();
         gameScene = createSceneFour();
-        //Field.openAll(); //TODO remove this once it's no longer needed
+        //Field.openAll(); //TODO (fully) remove this once it's no longer needed
 
         stage.setTitle("MINESWEEPER");
         stage.setScene(mainScene);
@@ -65,11 +65,20 @@ public class HelloApplication extends Application {
         tilePane.setAlignment(Pos.CENTER);
         tilePane.setHgap(0);
         tilePane.setVgap(0);
-        VBox vbox = new VBox();
-        vbox.getChildren().add(tilePane);
-        vbox.setFillWidth(false);
-        vbox.setAlignment(Pos.CENTER);
+        VBox fieldButtonVBox = new VBox();
+        fieldButtonVBox.getChildren().add(tilePane);
+        fieldButtonVBox.setFillWidth(false);
+        fieldButtonVBox.setAlignment(Pos.CENTER);
 
+        HBox labelHBox = new HBox();
+        for (int i = 0; i < myGame.debugLabels.size(); i++) {
+            labelHBox.getChildren().add(myGame.debugLabels.get(i));
+        }
+        labelHBox.setAlignment(Pos.TOP_CENTER);
+        labelHBox.setMinHeight(100);
+
+        VBox vbox = new VBox(labelHBox, fieldButtonVBox);
+        vbox.setAlignment(Pos.CENTER);
         Scene GameScene = new Scene(vbox, 960, 720);
         return GameScene;
     }

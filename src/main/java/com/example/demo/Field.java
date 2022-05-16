@@ -23,7 +23,7 @@ public class Field {
         coordX = x;
         coordY = y;
         button = new Button();
-        button.setStyle("-fx-background-color: black");
+        button.setStyle("-fx-background-color: black\n-fx-border-color: red;\n-fx-border-style: solid none none none");
         button.setOnAction(e-> fieldClicked());
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
@@ -36,6 +36,10 @@ public class Field {
     private void fieldClicked() {       //FIXME Hack to make sure openedThisTurn can be reset, replace with better idea
         fieldActivated();
         openedThisTurn = 0;
+        Game.debugLabels.get(3).setText("Currently Opened: " + openedFields.size() + "\t");
+        float ratio = Math.round(100 * openedFields.size() / FieldList.size());
+        ratio /= 100;
+        Game.debugLabels.get(4).setText("Ratio Opened: " + ratio + "\t");
     }
 
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once

@@ -1,4 +1,6 @@
 package com.example.demo;
+import javafx.scene.control.Label;
+
 import java.util.*;
 
 public class Game {
@@ -6,6 +8,7 @@ public class Game {
     public final int sizeY;
     public final int bombCount;
     public ArrayList<Field> FieldList;
+    public static ArrayList<Label> debugLabels;
 
     Game(int x, int y){
         sizeX = 0;
@@ -17,11 +20,17 @@ public class Game {
         sizeX = 20;
         sizeY = 14;
         FieldList = new ArrayList<>();
-
         Random rand = new Random();
         bombCount = 36 + rand.nextInt(8);
         createField(sizeX, sizeY);
-        System.out.println("The bomb count is " + bombCount);
+
+        debugLabels = new ArrayList<>();
+        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));
+        debugLabels.add(new Label("Currently Marked Bombs:\t"));
+        debugLabels.add(new Label("Total Flags:\t"));
+        debugLabels.add(new Label("Currently Opened: 0\t"));
+        debugLabels.add(new Label("Ratio Opened:\t"));
+
     }
 
     private void createField(int sizeX, int sizeY) {
@@ -61,8 +70,6 @@ public class Game {
                 i--;
             }
         }
-
-        System.out.println(bombPositions);
 
         for (int i = 0; i < bombPositions.size(); i++) {
             FieldList.get(bombPositions.get(i)).placeBomb();
