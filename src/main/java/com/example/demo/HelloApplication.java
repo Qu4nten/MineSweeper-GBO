@@ -37,7 +37,7 @@ public class HelloApplication extends Application {
         leaderScene = createSceneTwo();
         gamePrepScene = createSceneThree();
         gameScene = createSceneFour();
-        Field.openAll(); //TODO remove this once it's no longer needed
+        //Field.openAll(); //TODO remove this once it's no longer needed
 
         stage.setTitle("MINESWEEPER");
         stage.setScene(mainScene);

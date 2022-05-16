@@ -8,13 +8,9 @@ public class Game {
     public ArrayList<Field> FieldList;
 
     Game(int x, int y){
-        sizeX = x;
-        sizeY = y;
-        Random rand = new Random();
-        double randMod = (rand.nextFloat()/5)-0.1;
-        bombCount =  (int)Math.round( ((sizeX*sizeY)/12) *randMod);     //TODO: Fix this atrocity
-        FieldList = new ArrayList<>();
-
+        sizeX = 0;
+        sizeY = 0;
+        bombCount = 0;
     }
 
     Game(){
@@ -23,8 +19,6 @@ public class Game {
         FieldList = new ArrayList<>();
 
         Random rand = new Random();
-        /*double randMod = (rand.nextFloat()/5)-0.1;
-        bombCount =  (int)Math.round( ((sizeX*sizeY)/12) *randMod);     //TODO: Fix this atrocity*/
         bombCount = 36 + rand.nextInt(8);
         createField(sizeX, sizeY);
         System.out.println("The bomb count is " + bombCount);
@@ -38,6 +32,7 @@ public class Game {
             }
         }
         Field.setFieldList(FieldList);
+        Field.setMaxToOpen();
 
         for (int i = 0; i < Field.getFieldList().size(); i++) {
             Field.getFieldList().get(i).findNeigbours();
@@ -46,19 +41,6 @@ public class Game {
         assignFieldValues2(scatterBombs());
     }
 
-    /*private void assignFieldValues(ArrayList<Integer> bombPositions) {
-        for (int i = 0; i < bombPositions.size(); i++) {            //Iterates over every Bomb Position
-            Field current = FieldList.get(bombPositions.get(i));    //This is the bomb Field
-            ArrayList<Field> surroundingFields = new ArrayList<Field>();
-            surroundingFields = getSurroundingFields(current);      //The 3-8 Fields around the bomb
-            for (int j = 0; j < surroundingFields.size(); j++) {
-                if(surroundingFields.get(j).value >= 0) {           //If Field is not a bomb itself
-                    surroundingFields.get(j).value += 1;
-                }
-            }
-        }
-
-    } */
     private void assignFieldValues2(ArrayList<Integer> bombPositions){
         for (int i = 0; i < bombPositions.size(); i++) {    //TODO Replace with enhanced for loop
             for (int j = 0; j < Field.getFieldList().get(bombPositions.get(i)).getNeigbours().size(); j++) {
