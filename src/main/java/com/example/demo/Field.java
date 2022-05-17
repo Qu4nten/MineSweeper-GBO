@@ -23,7 +23,7 @@ public class Field {
         coordX = x;
         coordY = y;
         button = new Button();
-        button.setStyle("-fx-background-color: black\n-fx-border-color: red;\n-fx-border-style: solid none none none");
+        button.setStyle("-fx-background-color: black");
         button.setOnAction(e-> fieldClicked());
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
