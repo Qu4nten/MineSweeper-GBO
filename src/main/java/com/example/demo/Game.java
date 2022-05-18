@@ -16,7 +16,7 @@ public class Game {
         bombCount = 0;
     }
 
-    Game(){
+    Game(){                                                     //TODO show1
         sizeX = 20;
         sizeY = 14;
         FieldList = new ArrayList<>();
@@ -25,7 +25,7 @@ public class Game {
         createField(sizeX, sizeY);
 
         debugLabels = new ArrayList<>();
-        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));
+        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));      //TODO Put this in seperate method
         debugLabels.add(new Label("Currently Marked Bombs:\t"));
         debugLabels.add(new Label("Total Flags:\t"));
         debugLabels.add(new Label("Currently Opened: 0\t"));
@@ -33,7 +33,7 @@ public class Game {
 
     }
 
-    private void createField(int sizeX, int sizeY) {
+    private void createField(int sizeX, int sizeY) {        //TODO show2
         for (int i = 0; i < sizeY; i++) {       //Iterates over Y axis (0-13 Standard)
             for (int j = 0; j < sizeX; j++) {   //Iterates over X axis (0-20 Standard)
                 Field myField = new Field(i, j);
@@ -47,21 +47,21 @@ public class Game {
             Field.getFieldList().get(i).findNeigbours();
         }
 
-        assignFieldValues2(scatterBombs());
+        assignFieldValues(scatterBombs());
     }
 
-    private void assignFieldValues2(ArrayList<Integer> bombPositions){
+    private void assignFieldValues(ArrayList<Integer> bombPositions){          //TODO show6
         for (int i = 0; i < bombPositions.size(); i++) {    //TODO Replace with enhanced for loop
             for (int j = 0; j < Field.getFieldList().get(bombPositions.get(i)).getNeigbours().size(); j++) {
                 Field.getFieldList().get(bombPositions.get(i)).getNeigbours().get(j).incrementValue();
-            }
+            }   //Get Current Field with Bomb, get all neighbours, iterate over these and increment
         }
     }
 
-    private ArrayList<Integer> scatterBombs() {
+    private ArrayList<Integer> scatterBombs() {         //TODO show5
         Random rand = new Random();
-        ArrayList<Integer> bombPositions = new ArrayList<>();
-        for (int i = 0; i < bombCount; i++) {
+        ArrayList<Integer> bombPositions = new ArrayList<>();   //TODO This should just be a set
+        for (int i = 0; i < bombCount; i++) {                   //Places bomb at random point in array
             int current = rand.nextInt(sizeX*sizeY-1);
             bombPositions.add(current);
             Set<Integer> set = new HashSet<>(bombPositions);     //I stole this part
