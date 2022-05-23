@@ -3,40 +3,39 @@ import javafx.scene.control.Label;
 
 import java.util.*;
 
+import static java.lang.Math.floor;
+
 public class Game {
-    public final int sizeX;
+    private static Set<Field> bombSet = new HashSet<>();
+    public final int sizeX;     //Set to private
     public final int sizeY;
+    private final int difficulty;
     public final int bombCount;
     public ArrayList<Field> FieldList;
     public static ArrayList<Label> debugLabels;
 
-    Game(int x, int y){
-        sizeX = 0;
-        sizeY = 0;
-        bombCount = 0;
-    }
-
-    Game(){                                                     //TODO show1
-        sizeX = 20;
-        sizeY = 14;
+    Game(int x, int y, int diffi){
+        sizeX = x;
+        sizeY = y;
+        difficulty = diffi;
         FieldList = new ArrayList<>();
         Random rand = new Random();
-        bombCount = 36 + rand.nextInt(8);
+        bombCount = (int) Math.floor((x*y)/7) + rand.nextInt((int) Math.floor((x*y)/40));
+        //bombCount = 2; //TODO Debug Purposes, remove later
         createField(sizeX, sizeY);
 
         debugLabels = new ArrayList<>();
-        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));      //TODO Put this in seperate method
+        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));      //TODO Put this in separate method
         debugLabels.add(new Label("Currently Marked Bombs:\t"));
         debugLabels.add(new Label("Total Flags:\t"));
         debugLabels.add(new Label("Currently Opened: 0\t"));
         debugLabels.add(new Label("Ratio Opened:\t"));
-
     }
 
     private void createField(int sizeX, int sizeY) {        //TODO show2
         for (int i = 0; i < sizeY; i++) {       //Iterates over Y axis (0-13 Standard)
-            for (int j = 0; j < sizeX; j++) {   //Iterates over X axis (0-20 Standard)
-                Field myField = new Field(i, j);
+            for (int j = 0; j < sizeX; j++) {   //Iterates over X axis (0-19 Standard)
+                Field myField = new Field(i, j, this);
                 FieldList.add(myField);
             }
         }
@@ -69,13 +68,43 @@ public class Game {
                 bombPositions.remove(bombPositions.size() - 1);
                 i--;
             }
+            else {
+                bombSet.add(FieldList.get(current));        //This Set contains all Bomb Fields for later win decision
+            }
         }
-
+        for (Field i: bombSet) {    //TODO Debug Purposes
+            System.out.println(i.coordX + "\t" + i.coordY);
+        }
         for (int i = 0; i < bombPositions.size(); i++) {
             FieldList.get(bombPositions.get(i)).placeBomb();
         }
 
 
         return bombPositions;
+    }
+    public void checkWin() {
+        if (Field.getFlaggedFields().equals(bombSet)){
+            Game.win();
+        }
+
+    }
+
+    private static void win() {
+
+    System.out.println("You win");}
+
+    public boolean checkLose() {
+        Set<Field> openedFields = Field.getOpenedFields();
+        Iterator<Field> fieldIterator = openedFields.iterator();
+        while (fieldIterator.hasNext()){
+            if (fieldIterator.next().getValue() == -1){
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void lose() {
+        System.out.println("You lose");
     }
 }

@@ -33,10 +33,9 @@ public class HelloApplication extends Application {
 
         stage = primaryStage;
 
-        mainScene = createSceneOne();
-        leaderScene = createSceneTwo();
-        gamePrepScene = createSceneThree();
-        gameScene = createSceneFour();
+        mainScene = createMainScene();
+        leaderScene = createLeaderBoardScene();
+        gamePrepScene = createGamePrepScene();
         //Field.openAll(); //TODO (fully) remove this once it's no longer needed
 
         stage.setTitle("MINESWEEPER");
@@ -44,24 +43,18 @@ public class HelloApplication extends Application {
         stage.setResizable(false);
         stage.show();
 
-        //Game myGame = new Game();
-        /*
-          for (int i = 0; i < myGame.FieldList.size(); i++) {
-            System.out.println(myGame.FieldList.get(i).coordX + " / " + myGame.FieldList.get(i).coordY);
-          }
-          System.out.println("Done");
-          */
+
 
     }
 
-    private Scene createSceneFour(){
+    private void createGameSceneAndSwitch(int sizeX, int sizeY, int difficulty){
         TilePane tilePane = new TilePane();
-        Game myGame = new Game();
+        Game myGame = new Game(sizeX, sizeY, difficulty);
 
         for (int i = 0; i < myGame.FieldList.size(); i++) {
             tilePane.getChildren().add(myGame.FieldList.get(i).button);
         }
-        tilePane.setPrefColumns(20);
+        tilePane.setPrefColumns(sizeX);
         tilePane.setAlignment(Pos.CENTER);
         tilePane.setHgap(0);
         tilePane.setVgap(0);
@@ -80,10 +73,10 @@ public class HelloApplication extends Application {
         VBox vbox = new VBox(labelHBox, fieldButtonVBox);
         vbox.setAlignment(Pos.CENTER);
         Scene GameScene = new Scene(vbox, 960, 720);
-        return GameScene;
+        switchScenes(GameScene);
     }
 
-    private Scene createSceneThree() {
+    private Scene createGamePrepScene() {
         Button button1 = new Button("Back");
         button1.setMaxWidth(Double.MAX_VALUE);
         button1.setOnAction(e-> switchScenes(mainScene));
@@ -94,20 +87,20 @@ public class HelloApplication extends Application {
 
         Label labelSZ = new Label("Size:");
 
-        TextField inputSize1 = new TextField();
-
-        Label labelCL = new Label(":");
-
-        TextField inputSize2 = new TextField();
+        ObservableList<String> optionsSize =
+                FXCollections.observableArrayList(
+                        "20 : 14",
+                        "14 :  9",
+                        "30 : 21"
+                );
+        final ComboBox comboBoxSize = new ComboBox(optionsSize);
+        comboBoxSize.getSelectionModel().selectFirst();
 
         HBox hbox1 = new HBox();
         HBox.setMargin(labelSZ, new Insets(0, 10, 0, 10));
-        HBox.setMargin(labelCL, new Insets(0, 10, 0, 10));
 
         hbox1.getChildren().add(labelSZ);
-        hbox1.getChildren().add(inputSize1);
-        hbox1.getChildren().add(labelCL);
-        hbox1.getChildren().add(inputSize2);
+        hbox1.getChildren().add(comboBoxSize);
 
         ObservableList<String> options =
                 FXCollections.observableArrayList(
@@ -115,11 +108,34 @@ public class HelloApplication extends Application {
                         "Medium",
                         "Hard"
                 );
-        final ComboBox comboBox = new ComboBox(options);
-        comboBox.getSelectionModel().selectFirst();
+        final ComboBox comboBoxDifficulty = new ComboBox(options);
+        comboBoxDifficulty.getSelectionModel().selectFirst();
 
         Button button2 = new Button("Start");
-        VBox vbox = new VBox(labelPL, hbox1, comboBox, button2, button1);
+        int selectedSize = -1;
+        if (comboBoxSize.getValue() == "20 : 14"){selectedSize = 0;}
+        else if (comboBoxSize.getValue() == "14 :  9"){selectedSize = 1;}
+        else if (comboBoxSize.getValue() == "30 : 21"){selectedSize = 2;}
+
+        int selectedDifficulty = -1;
+        if (comboBoxDifficulty.getValue() == "Easy"){selectedSize   = 0;}
+        if (comboBoxDifficulty.getValue() == "Medium"){selectedSize = 1;}
+        if (comboBoxDifficulty.getValue() == "Hard"){selectedSize   = 2;}
+
+        button2.setOnAction(e->{
+            int x       = -1;
+            int y       = -1;
+            int diffi   = -1;
+            int choice = comboBoxSize.getSelectionModel().getSelectedIndex();
+            if (choice == 0){x = 20;y = 14;}
+            else if (choice == 1){x = 14; y = 9;}
+            else if (choice == 2){x = 24; y = 18;}
+            diffi = comboBoxDifficulty.getSelectionModel().getSelectedIndex();
+            createGameSceneAndSwitch(x, y,diffi);
+        });
+
+
+        VBox vbox = new VBox(labelPL, hbox1, comboBoxDifficulty, button2, button1);
         vbox.setFillWidth(true);
         vbox.setAlignment(Pos.BASELINE_LEFT);
 
@@ -127,7 +143,7 @@ public class HelloApplication extends Application {
         return gamePrepScene;
     }
 
-    private Scene createSceneOne() {
+    private Scene createMainScene() {
         double r=50;
 
         Label labelMS = new Label("MINESWEEPER");
@@ -161,7 +177,7 @@ public class HelloApplication extends Application {
         button3.setShape(new Circle(r));
         button3.setMinSize(18*r, 2*r);
         button3.setMaxSize(18*r, 2*r);
-        button3.setOnAction(e-> switchScenes(gameScene));
+        //button3.setOnAction(e-> switchScenes(gameScene));
 
         VBox layout = new VBox(20, labelMS, button1, button2, button3);
         layout.setAlignment(BASELINE_CENTER);
@@ -178,7 +194,7 @@ public class HelloApplication extends Application {
         Scene scene1 = new Scene(layout, 960, 720);
         return scene1;
     }
-    private Scene createSceneTwo() {
+    private Scene createLeaderBoardScene() {
         BorderPane borderPane = new BorderPane();
         VBox vBox = new VBox();
         Button button = new Button("Back");

@@ -21,8 +21,10 @@ public class Field {
     private ArrayList<Field> neigbours;
     private ArrayList<Field> cardinalNeigbours;
     private boolean flagged = false;
+    private Game myGame;
 
-    Field(int x, int y){
+
+    Field(int x, int y, Game myGame){
         coordX = x;
         coordY = y;
         button = new Button();
@@ -43,11 +45,14 @@ public class Field {
         value = 0;
         neigbours = new ArrayList<>();
         cardinalNeigbours = new ArrayList<>();
+        this.myGame = myGame;
     }
 
     public static Set<Field> getFlaggedFields() {
         return flaggedFields;
     }
+    public static Set<Field> getOpenedFields() {return openedFields;}
+    public int getValue() {return value;}
 
     private void fieldRightClicked() {
         if (openedFields.contains(this)) return;
@@ -56,6 +61,7 @@ public class Field {
             button.setStyle("-fx-text-fill: #c41414;-fx-background-color: black;-fx-font-weight: bold");
             flagged = true;
             flaggedFields.add(this);
+            myGame.checkWin();
         }
         else if (flagged){
             button.setText("");
@@ -65,8 +71,6 @@ public class Field {
         }
         Game.debugLabels.get(2).setText("Current Flags: " + flaggedFields.size() + "\t");
     }
-
-
     private void fieldClicked() {       //FIXME Hack to make sure openedThisTurn can be reset, replace with better idea
         if (openedFields.contains(this)) return;
         fieldActivated();               //TODO show7
@@ -75,6 +79,9 @@ public class Field {
         float ratio = Math.round(100 * openedFields.size() / FieldList.size());
         ratio /= 100;
         Game.debugLabels.get(4).setText("Ratio Opened: " + ratio + "\t");
+        if(myGame.checkLose()) {
+            myGame.lose();
+        }
     }
 
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once    //TODO show3
