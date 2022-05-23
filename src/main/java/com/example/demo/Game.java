@@ -44,7 +44,6 @@ public class Game {
 
         for (int i = 0; i < Field.getFieldList().size(); i++) {
             Field.getFieldList().get(i).findNeigbours();
-            Field.getFieldList().get(i).findBorderPosition();
         }
 
         assignFieldValues(scatterBombs());

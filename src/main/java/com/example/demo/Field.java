@@ -24,14 +24,13 @@ public class Field {
     private ArrayList<Field> cardinalNeigbours;
     private boolean flagged = false;
     private Game myGame;
-    private Position borderPos;
 
 
     Field(int x, int y, Game myGame){
         coordX = x;
         coordY = y;
         button = new Button();
-        button.setStyle("-fx-background-color: black");
+        button.setStyle(MyStyles.closedColorBG);
         button.setOnMouseClicked(event->
         {
             if (event.getButton() == MouseButton.PRIMARY) {
@@ -62,14 +61,14 @@ public class Field {
         if (openedFields.contains(this)) return;
         if (!flagged) {
             button.setText("\uD83D\uDEA9");
-            button.setStyle("-fx-text-fill: #c41414;-fx-background-color: black;-fx-font-weight: bold");
+            button.setStyle(MyStyles.closedColorBG + MyStyles.redColorFont + MyStyles.boldFont);
             flagged = true;
             flaggedFields.add(this);
             myGame.checkWin();
         }
         else if (flagged){
             button.setText("");
-            button.setStyle("-fx-text-fill: #c41414;-fx-background-color: black;-fx-font-weight: bold");
+            button.setStyle(MyStyles.closedColorBG);
             flagged = false;
             flaggedFields.remove(this);
         }
@@ -86,8 +85,6 @@ public class Field {
         if(myGame.checkLose()) {
             myGame.lose();
         }
-        System.out.println(this.borderPos);
-        System.out.println(this.coordX + " - " + this.coordY);
     }
 
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once    //TODO show3
@@ -112,29 +109,29 @@ public class Field {
         openedThisTurn++;                 //TODO show8
         if (value == -1){
             button.setText("⬤");
-            button.setStyle("-fx-text-fill: black;-fx-font-weight: bold;-fx-background-color: white");
+            button.setStyle(MyStyles.blackColorFont + MyStyles.boldFont + MyStyles.openedColorBG);
             openedFields.add(this);
         }
         else if (value == 0){
             button.setText("");
-            button.setStyle("-fx-background-color: white");
+            button.setStyle(MyStyles.openedColorBG);
             openedFields.add(this);
             openMass();
         }
         else if (value == 1){
-            button.setText("1");
-            button.setStyle("-fx-text-fill: #184d28;-fx-background-color: white;-fx-font-weight: bold");
+            button.setText(Integer.toString(value));
+            button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.oneColorFont);
             openedFields.add(this);
             openMass();
         }
         else if (value == 2){
-            button.setText("2");
-            button.setStyle("-fx-text-fill: #a85c32;-fx-background-color: white;-fx-font-weight: bold");
+            button.setText(Integer.toString(value));
+            button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.twoColorFont);
             openedFields.add(this);
         }
         else{
             button.setText(Integer.toString(value));
-            button.setStyle("-fx-text-fill: #c41414;-fx-background-color: white;-fx-font-weight: bold");
+            button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.threePlusColorFont);
             openedFields.add(this);
         }
     }
@@ -217,7 +214,7 @@ public class Field {
         }
     }
 
-    public void findBorderPosition() {      //Discerns if Field is at border according to existing Fields in vicinity
+    /*public void findBorderPosition() {      //Discerns if Field is at border according to existing Fields in vicinity
         if ((getFieldOffsetFromThis(-1, 0) == null) && (getFieldOffsetFromThis(0,-1) == null)) {
             borderPos = Position.TOP_LEFT;
         }
@@ -245,5 +242,5 @@ public class Field {
         else {
             borderPos = Position.CENTER;
         }
-    }
+    }*/
 }
