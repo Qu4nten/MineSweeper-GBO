@@ -2,6 +2,8 @@ package com.example.demo;
 
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseButton;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -22,6 +24,7 @@ public class Field {
     private ArrayList<Field> cardinalNeigbours;
     private boolean flagged = false;
     private Game myGame;
+    private Position borderPos;
 
 
     Field(int x, int y, Game myGame){
@@ -42,6 +45,7 @@ public class Field {
         });
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
+        button.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));  //StackOverflow
         value = 0;
         neigbours = new ArrayList<>();
         cardinalNeigbours = new ArrayList<>();
@@ -82,6 +86,8 @@ public class Field {
         if(myGame.checkLose()) {
             myGame.lose();
         }
+        System.out.println(this.borderPos);
+        System.out.println(this.coordX + " - " + this.coordY);
     }
 
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once    //TODO show3
@@ -92,6 +98,14 @@ public class Field {
             }
             else break;
         }
+    }
+
+    private void updateCss(){
+        /*
+        one for every value from 0-4
+        one for every border setting
+         */
+
     }
 
     public void fieldActivated() {        //FIXME Change this back to private once open all is no longer needed // Or don't?
@@ -200,6 +214,36 @@ public class Field {
     public static void openAll(){
         for (int i = 0; i < FieldList.size(); i++) {
             FieldList.get(i).fieldActivated();
+        }
+    }
+
+    public void findBorderPosition() {      //Discerns if Field is at border according to existing Fields in vicinity
+        if ((getFieldOffsetFromThis(-1, 0) == null) && (getFieldOffsetFromThis(0,-1) == null)) {
+            borderPos = Position.TOP_LEFT;
+        }
+        else if ((getFieldOffsetFromThis(1, 0) == null) && (getFieldOffsetFromThis(0,-1) == null)) {
+            borderPos = Position.TOP_RIGHT;
+        }
+        else if ((getFieldOffsetFromThis(1, 0) == null) && (getFieldOffsetFromThis(0,1) == null)) {
+            borderPos = Position.BOTTOM_RIGHT;
+        }
+        else if ((getFieldOffsetFromThis(-1, 0) == null) && (getFieldOffsetFromThis(0,1) == null)) {
+            borderPos = Position.BOTTOM_LEFT;
+        }
+        else if (getFieldOffsetFromThis(0, -1) == null) {
+            borderPos = Position.TOP;
+        }
+        else if (getFieldOffsetFromThis(1, 0) == null) {
+            borderPos = Position.RIGHT;
+        }
+        else if (getFieldOffsetFromThis(0, 1) == null) {
+            borderPos = Position.BOTTOM;
+        }
+        else if (getFieldOffsetFromThis(-1, 0) == null) {
+            borderPos = Position.LEFT;
+        }
+        else {
+            borderPos = Position.CENTER;
         }
     }
 }

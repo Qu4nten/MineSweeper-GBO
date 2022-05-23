@@ -17,7 +17,7 @@ import java.io.IOException;
 
 import static javafx.geometry.Pos.BASELINE_CENTER;
 
-public class HelloApplication extends Application {
+public class Main extends Application {
 
     private Stage stage;
 
@@ -42,14 +42,11 @@ public class HelloApplication extends Application {
         stage.setScene(mainScene);
         stage.setResizable(false);
         stage.show();
-
-
-
     }
 
     private void createGameSceneAndSwitch(int sizeX, int sizeY, int difficulty){
         TilePane tilePane = new TilePane();
-        Game myGame = new Game(sizeX, sizeY, difficulty);
+        Game myGame = new Game(sizeX, sizeY, difficulty, this);
 
         for (int i = 0; i < myGame.FieldList.size(); i++) {
             tilePane.getChildren().add(myGame.FieldList.get(i).button);
@@ -58,6 +55,8 @@ public class HelloApplication extends Application {
         tilePane.setAlignment(Pos.CENTER);
         tilePane.setHgap(0);
         tilePane.setVgap(0);
+        tilePane.setStyle("-fx-border-color: black");
+        tilePane.setPadding(new Insets(10, 10, 10 ,10));
         VBox fieldButtonVBox = new VBox();
         fieldButtonVBox.getChildren().add(tilePane);
         fieldButtonVBox.setFillWidth(false);
@@ -72,6 +71,7 @@ public class HelloApplication extends Application {
 
         VBox vbox = new VBox(labelHBox, fieldButtonVBox);
         vbox.setAlignment(Pos.CENTER);
+        vbox.setPadding(new Insets(10,10,10,10));
         Scene GameScene = new Scene(vbox, 960, 720);
         switchScenes(GameScene);
     }
@@ -91,7 +91,7 @@ public class HelloApplication extends Application {
                 FXCollections.observableArrayList(
                         "20 : 14",
                         "14 :  9",
-                        "30 : 21"
+                        "24 : 17"
                 );
         final ComboBox comboBoxSize = new ComboBox(optionsSize);
         comboBoxSize.getSelectionModel().selectFirst();
@@ -112,26 +112,17 @@ public class HelloApplication extends Application {
         comboBoxDifficulty.getSelectionModel().selectFirst();
 
         Button button2 = new Button("Start");
-        int selectedSize = -1;
-        if (comboBoxSize.getValue() == "20 : 14"){selectedSize = 0;}
-        else if (comboBoxSize.getValue() == "14 :  9"){selectedSize = 1;}
-        else if (comboBoxSize.getValue() == "30 : 21"){selectedSize = 2;}
-
-        int selectedDifficulty = -1;
-        if (comboBoxDifficulty.getValue() == "Easy"){selectedSize   = 0;}
-        if (comboBoxDifficulty.getValue() == "Medium"){selectedSize = 1;}
-        if (comboBoxDifficulty.getValue() == "Hard"){selectedSize   = 2;}
 
         button2.setOnAction(e->{
             int x       = -1;
             int y       = -1;
-            int diffi   = -1;
+            int diffc   = -1;
             int choice = comboBoxSize.getSelectionModel().getSelectedIndex();
             if (choice == 0){x = 20;y = 14;}
             else if (choice == 1){x = 14; y = 9;}
-            else if (choice == 2){x = 24; y = 18;}
-            diffi = comboBoxDifficulty.getSelectionModel().getSelectedIndex();
-            createGameSceneAndSwitch(x, y,diffi);
+            else if (choice == 2){x = 24; y = 17;}
+            diffc = comboBoxDifficulty.getSelectionModel().getSelectedIndex();
+            createGameSceneAndSwitch(x, y,diffc);
         });
 
 
@@ -143,6 +134,9 @@ public class HelloApplication extends Application {
         return gamePrepScene;
     }
 
+    public void createPostGameSceneAndSwitch(boolean state){
+
+    }
     private Scene createMainScene() {
         double r=50;
 

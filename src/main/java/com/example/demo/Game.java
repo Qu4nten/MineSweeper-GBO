@@ -3,8 +3,6 @@ import javafx.scene.control.Label;
 
 import java.util.*;
 
-import static java.lang.Math.floor;
-
 public class Game {
     private static Set<Field> bombSet = new HashSet<>();
     public final int sizeX;     //Set to private
@@ -13,11 +11,13 @@ public class Game {
     public final int bombCount;
     public ArrayList<Field> FieldList;
     public static ArrayList<Label> debugLabels;
+    private static Main myController;
 
-    Game(int x, int y, int diffi){
+    Game(int x, int y, int diffi, Main myCtr){
         sizeX = x;
         sizeY = y;
         difficulty = diffi;
+        myController = myCtr;
         FieldList = new ArrayList<>();
         Random rand = new Random();
         bombCount = (int) Math.floor((x*y)/7) + rand.nextInt((int) Math.floor((x*y)/40));
@@ -44,6 +44,7 @@ public class Game {
 
         for (int i = 0; i < Field.getFieldList().size(); i++) {
             Field.getFieldList().get(i).findNeigbours();
+            Field.getFieldList().get(i).findBorderPosition();
         }
 
         assignFieldValues(scatterBombs());
@@ -91,7 +92,9 @@ public class Game {
 
     private static void win() {
 
-    System.out.println("You win");}
+    System.out.println("You win");
+    myController.createPostGameSceneAndSwitch(true);
+    }
 
     public boolean checkLose() {
         Set<Field> openedFields = Field.getOpenedFields();
@@ -105,6 +108,6 @@ public class Game {
     }
 
     public void lose() {
-        System.out.println("You lose");
+        myController.createPostGameSceneAndSwitch(false);
     }
 }
