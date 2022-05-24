@@ -14,7 +14,8 @@ public class Game {
     private final int difficulty;
     private final int bombCount;
     public ArrayList<Field> FieldList;
-    public static ArrayList<Label> debugLabels;
+    private Set<Field> flaggedFields = new HashSet<>();
+    private Set<Field> openedFields = new HashSet<>();
     private Label timeLabel;
     private Label flagLabel;
     private final Instant startTime = Instant.now();
@@ -49,14 +50,17 @@ public class Game {
         //bombCount = 2; //TODO Debug Purposes, remove later
         createField(sizeX, sizeY);
 
-        debugLabels = new ArrayList<>();
-        debugLabels.add(new Label("Total Bombs: " + bombCount +"\t"));      //TODO Put this in separate method
-        debugLabels.add(new Label("Currently Marked Bombs:\t"));
-        debugLabels.add(new Label("Total Flags:\t"));
-        debugLabels.add(new Label("Currently Opened: 0\t"));
-        debugLabels.add(new Label("Ratio Opened:\t"));
 
 
+
+    }
+
+    public Set<Field> getOpenedFields() {
+        return openedFields;
+    }
+
+    public Set<Field> getFlaggedFields() {
+        return flaggedFields;
     }
 
     public String getGameTime() {
@@ -92,7 +96,7 @@ public class Game {
         timeLabel.setText(timePassed);
     }
     public void updateFlagLabel() {
-        int flagsToSet = bombCount - Field.getFlaggedFields().size();
+        int flagsToSet = bombCount - flaggedFields.size();
         flagLabel.setText("\uD83D\uDEA9" + flagsToSet);
     }
 
@@ -147,14 +151,14 @@ public class Game {
         return bombPositions;
     }
     public void checkWin() {
-        if (Field.getFlaggedFields().equals(bombSet)){
+        if (flaggedFields.equals(bombSet)){
             Game.win();
         }
 
     }
     public int getCorrectlyFlagged() {
         int correctlyFlagged = 0;
-        Iterator<Field> flaggedIterator = Field.getFlaggedFields().iterator();
+        Iterator<Field> flaggedIterator = flaggedFields.iterator();
         while(flaggedIterator.hasNext()) {
             if (flaggedIterator.next().getValue() == -1) {
                 correctlyFlagged++;
@@ -170,7 +174,6 @@ public class Game {
     }
 
     public boolean checkLose() {
-        Set<Field> openedFields = Field.getOpenedFields();
         Iterator<Field> fieldIterator = openedFields.iterator();
         while (fieldIterator.hasNext()){
             if (fieldIterator.next().getValue() == -1){

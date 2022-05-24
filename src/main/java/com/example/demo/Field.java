@@ -14,7 +14,6 @@ public class Field {
     private static ArrayList<Field> FieldList;
     private static int maxMultiOpen = 1;
     private static Set<Field> openedFields = new HashSet<>(); //I chose a Set here to prevent Duplicates
-    private static Set<Field> flaggedFields = new HashSet<>();
     private static int openedThisTurn = 0;
     public final int coordX;
     public final int coordY;
@@ -50,19 +49,16 @@ public class Field {
         cardinalNeigbours = new ArrayList<>();
         this.myGame = myGame;
     }
-    public static Set<Field> getFlaggedFields() {
-        return flaggedFields;
-    }
-    public static Set<Field> getOpenedFields() {return openedFields;}
+
     public int getValue() {return value;}
 
     private void fieldRightClicked() {
-        if (openedFields.contains(this)) return;
+        if (myGame.getOpenedFields().contains(this)) return;
         if (!flagged) {
             button.setText("\uD83D\uDEA9");
             button.setStyle(MyStyles.closedColorBG + MyStyles.threePlusColorFont + MyStyles.boldFont);
             flagged = true;
-            flaggedFields.add(this);
+            myGame.getFlaggedFields().add(this);
             myGame.updateFlagLabel();
             myGame.checkWin();
         }
@@ -70,18 +66,13 @@ public class Field {
             button.setText("");
             button.setStyle(MyStyles.closedColorBG);
             flagged = false;
-            flaggedFields.remove(this);
+            myGame.getFlaggedFields().remove(this);
         }
-        Game.debugLabels.get(2).setText("Current Flags: " + flaggedFields.size() + "\t");
     }
     private void fieldClicked() {       //FIXME Hack to make sure openedThisTurn can be reset, replace with better idea
-        if (openedFields.contains(this)) return;
+        if (myGame.getOpenedFields().contains(this)) return;
         fieldActivated();               //TODO show7
         openedThisTurn = 0;             //All this happens *after* the multiOpen
-        Game.debugLabels.get(3).setText("Currently Opened: " + openedFields.size() + "\t");
-        float ratio = Math.round(100 * openedFields.size() / FieldList.size());
-        ratio /= 100;
-        Game.debugLabels.get(4).setText("Ratio Opened: " + ratio + "\t");
         if(myGame.checkLose()) {
             myGame.lose();
         }
@@ -110,34 +101,34 @@ public class Field {
         if (value == -1){
             button.setText("⬤");
             button.setStyle(MyStyles.blackColorFont + MyStyles.boldFont + MyStyles.openedColorBG);
-            openedFields.add(this);
+            myGame.getOpenedFields().add(this);
         }
         else if (value == 0){
             button.setText("");
             button.setStyle(MyStyles.openedColorBG);
-            openedFields.add(this);
+            myGame.getOpenedFields().add(this);
             openMass();
         }
         else if (value == 1){
             button.setText(Integer.toString(value));
             button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.oneColorFont);
-            openedFields.add(this);
+            myGame.getOpenedFields().add(this);
             openMass();
         }
         else if (value == 2){
             button.setText(Integer.toString(value));
             button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.twoColorFont);
-            openedFields.add(this);
+            myGame.getOpenedFields().add(this);
         }
         else{
             button.setText(Integer.toString(value));
             button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.threePlusColorFont);
-            openedFields.add(this);
+            myGame.getOpenedFields().add(this);
         }
     }
 
     private void openMass() {               //TODO show9
-        float share = (float)openedFields.size() / (float)FieldList.size();
+        float share = (float)myGame.getOpenedFields().size() / (float)FieldList.size();
         if (share > 0.5){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
             maxMultiOpen = 0;
             return;
@@ -148,9 +139,9 @@ public class Field {
         else {
             for (int i = 0; i < cardinalNeigbours.size(); i++) {
                 if(cardinalNeigbours.get(i).value != -1){       //if Cardinal neighbour is *not* a bomb
-                    if((!openedFields.contains(cardinalNeigbours.get(i))) && (!flaggedFields.contains(cardinalNeigbours.get(i)))) { //if cardinalNeighbour is *not* already open or flagged
+                    if((!myGame.getOpenedFields().contains(cardinalNeigbours.get(i))) && (!myGame.getFlaggedFields().contains(cardinalNeigbours.get(i)))) { //if cardinalNeighbour is *not* already open or flagged
                         cardinalNeigbours.get(i).fieldActivated();  //TODO check if this check is redundant //TODO Consider rewriting this with temp var currentNeighbour
-                        openedFields.add(this);
+                        myGame.getOpenedFields().add(this);
                     }
                 }
             }

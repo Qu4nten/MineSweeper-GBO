@@ -96,12 +96,12 @@ public class Main extends Application {
         Button button1 = new Button("Back");
         button1.setMaxWidth(Double.MAX_VALUE);
         button1.setOnAction(e-> switchScenes(mainScene));
+        button1.setStyle("-fx-font: 20px \"Impact\";");
+        button1.setPadding(new Insets(10, 30, 10, 30));
 
         Label labelPL = new Label("PLAY!");
         labelPL.setFont(new Font(MyStyles.fontGeneral, 50));
         labelPL.setTextFill(Color.web("Red"));
-
-        Label labelSZ = new Label("Size:");
 
         ObservableList<String> optionsSize =
                 FXCollections.observableArrayList(
@@ -111,11 +111,10 @@ public class Main extends Application {
                 );
         final ComboBox comboBoxSize = new ComboBox(optionsSize);
         comboBoxSize.getSelectionModel().selectFirst();
+        comboBoxSize.setStyle("-fx-font: 30px \"Impact\";");
 
         HBox hbox1 = new HBox();
-        HBox.setMargin(labelSZ, new Insets(0, 10, 0, 10));
 
-        hbox1.getChildren().add(labelSZ);
         hbox1.getChildren().add(comboBoxSize);
 
         ObservableList<String> options =
@@ -126,8 +125,15 @@ public class Main extends Application {
                 );
         final ComboBox comboBoxDifficulty = new ComboBox(options);
         comboBoxDifficulty.getSelectionModel().selectFirst();
+        comboBoxDifficulty.setStyle("-fx-font: 30px \"Impact\";");
+        hbox1.getChildren().add(comboBoxDifficulty);
+        HBox.setMargin(comboBoxDifficulty, new Insets(10, 0, 50, 50));
+        HBox.setMargin(comboBoxSize, new Insets(10, 0,50,0));
+        hbox1.setAlignment(Pos.CENTER);
 
         Button button2 = new Button("Start");
+        button2.setPadding(new Insets(20, 50, 20, 50));
+        button2.setStyle("-fx-font: 30px \"Impact\";");
 
         button2.setOnAction(e->{
             int x       = -1;
@@ -142,9 +148,9 @@ public class Main extends Application {
         });
 
 
-        VBox vbox = new VBox(labelPL, hbox1, comboBoxDifficulty, button2, button1);
+        VBox vbox = new VBox(50, labelPL, hbox1, button2, button1);
         vbox.setFillWidth(true);
-        vbox.setAlignment(Pos.BASELINE_LEFT);
+        vbox.setAlignment(BASELINE_CENTER);
 
         Scene gamePrepScene = new Scene(vbox,960,720);
         return gamePrepScene;
@@ -269,7 +275,7 @@ public class Main extends Application {
         Button button = new Button("Back");
 
         Label labelLB = new Label("LEADERBOARD");
-        labelLB.setFont(new Font("Comic Sans MS", 50));
+        labelLB.setFont(new Font(MyStyles.fontGeneral, 50));
         labelLB.setTextFill(Color.web("Red"));
 
         borderPane.setTop(labelLB);
