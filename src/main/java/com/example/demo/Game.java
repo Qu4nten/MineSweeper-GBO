@@ -8,12 +8,13 @@ import java.time.Instant;
 import java.util.*;
 
 public class Game {
-    private static final Set<Field> bombSet = new HashSet<>();
-    public final int sizeX;     //Set to private
-    public final int sizeY;
+    private final Set<Field> bombSet = new HashSet<>();
+    private final int sizeX;
+    private final int sizeY;
     private final int difficulty;
     private final int bombCount;
-    public ArrayList<Field> FieldList;
+    private int maxToOpen;
+    private final ArrayList<Field> fieldList;
     private final Set<Field> flaggedFields = new HashSet<>();
     private final Set<Field> openedFields = new HashSet<>();
     private Label timeLabel;
@@ -26,17 +27,17 @@ public class Game {
         sizeY = y;
         difficulty = diffi;
         myController = myCtr;
-        FieldList = new ArrayList<>();
+        fieldList = new ArrayList<>();
         timeLabel = new Label();
         Random rand = new Random();
         float difficultyMultiplier = switch (difficulty) {
-            case 0  -> 0.8f;
+            case 0  -> 0.3f;        //This might be too low
             case 1  -> 1f;
             case 2  -> 1.2f;
             default -> 1f;
         };
-        if(1==1){bombCount = (int) Math.floor((Math.floor((x*y)/7f) + rand.nextInt((int) Math.floor((x*y)/40f)))*difficultyMultiplier);}
-        else {bombCount = 2;}//TODO Debug Purposes
+        if(true){bombCount = (int) Math.floor((Math.floor((x*y)/7f) + rand.nextInt((int) Math.floor((x*y)/40f)))*difficultyMultiplier);}
+        else {bombCount = 2;}//TODO Presentation purposes
         createLabels();
         createField(sizeX, sizeY);
     }
@@ -54,6 +55,10 @@ public class Game {
     }
     public int getBombCount() {
         return bombCount;
+    }
+
+    public ArrayList<Field> getFieldList() {
+        return fieldList;
     }
 
     public int getDifficulty() {
@@ -78,7 +83,7 @@ public class Game {
         return flagLabel;
     }
     public void updateTimeLabel() {
-        String timePassed = Long.toString(Duration.between(startTime, Instant.now()).toSeconds());
+        String timePassed = "\uD83D\uDD51"+ Duration.between(startTime, Instant.now()).toSeconds();
         timeLabel.setText(timePassed);
     }
     public void updateFlagLabel() {
@@ -86,51 +91,68 @@ public class Game {
         flagLabel.setText("\uD83D\uDEA9" + flagsToSet);
     }
 
-    private void createField(int sizeX, int sizeY) {        //TODO show2
+    private void createField(int sizeX, int sizeY) {
         for (int i = 0; i < sizeY; i++) {       //Iterates over Y axis (0-13 Standard)
             for (int j = 0; j < sizeX; j++) {   //Iterates over X axis (0-19 Standard)
                 Field myField = new Field(i, j, this);
-                FieldList.add(myField);
+                fieldList.add(myField);
             }
         }
-        Field.setFieldList(FieldList);
-        Field.setMaxToOpen();
+        setMaxToOpen();
 
-        for (int i = 0; i < Field.getFieldList().size(); i++) {
-            Field.getFieldList().get(i).findNeigbours();
+        for (Field field : fieldList) {
+            field.findNeigbours();
         }
 
         assignFieldValues(scatterBombs());
     }
 
-    private void assignFieldValues(ArrayList<Integer> bombPositions){          //TODO show6
-        for (Integer bombPosition : bombPositions) {    //TODO Replace with enhanced for loop
-            for (int j = 0; j < Field.getFieldList().get(bombPosition).getNeigbours().size(); j++) {
-                Field.getFieldList().get(bombPosition).getNeigbours().get(j).incrementValue();
+    public int getMaxToOpen() {
+        return maxToOpen;
+    }
+
+    public void setMaxToOpen(int maxToOpen) {
+        this.maxToOpen = maxToOpen;
+    }
+
+    private void setMaxToOpen() {
+        float temp = fieldList.size() / 10f;        //1 ; 5 ; 13 ; 25 ; 41 ; 61; 81 etc.
+        for (int i = 0;; i++) {
+            if (temp > (float)maxToOpen){
+                maxToOpen = maxToOpen + i*4;
+            }
+            else break;
+        }
+    }
+
+    private void assignFieldValues(Set<Integer> bombPositions){
+        for (Integer bombPosition : bombPositions) {
+            for (int j = 0; j < fieldList.get(bombPosition).getNeigbours().size(); j++) {
+                fieldList.get(bombPosition).getNeigbours().get(j).incrementValue();
             }   //Get Current Field with Bomb, get all neighbours, iterate over these and increment
         }
     }
 
-    private ArrayList<Integer> scatterBombs() {         //TODO show5
+    private Set<Integer> scatterBombs() {
         Random rand = new Random();
-        ArrayList<Integer> bombPositions = new ArrayList<>();   //TODO This should just be a set
+        int sizePre;
+        int sizePost;
+        Set<Integer> bombPositions = new HashSet<>();
         for (int i = 0; i < bombCount; i++) {                   //Places bomb at random point in array
             int current = rand.nextInt(sizeX*sizeY-1);
+            sizePre = bombPositions.size();
             bombPositions.add(current);
-            Set<Integer> set = new HashSet<>(bombPositions);     //I stole this part
-            if(set.size() < bombPositions.size()){               //Removes Duplicates from list
-                bombPositions.remove(bombPositions.size() - 1);
+            sizePost = bombPositions.size();
+            if(sizePre == sizePost){
                 i--;
             }
             else {
-                bombSet.add(FieldList.get(current));        //This Set contains all Bomb Fields for later win decision
+                bombSet.add(fieldList.get(current));
             }
-        }
-        for (Field i: bombSet) {    //TODO Debug Purposes
-            System.out.println(i.coordX + "\t" + i.coordY);
+
         }
         for (Integer bombPosition : bombPositions) {
-            FieldList.get(bombPosition).placeBomb();
+            fieldList.get(bombPosition).placeBomb();
         }
 
 
@@ -153,8 +175,6 @@ public class Game {
     }
 
     private static void win() {
-
-    System.out.println("You win");
     myController.createPostGameSceneAndSwitch(true);
     }
 
@@ -168,7 +188,6 @@ public class Game {
     }
 
     public void lose() {
-        System.out.println("You lose");
         myController.createPostGameSceneAndSwitch(false);
     }
 }

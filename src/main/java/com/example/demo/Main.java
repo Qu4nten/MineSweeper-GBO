@@ -52,8 +52,8 @@ public class Main extends Application {
         Game myGame = new Game(sizeX, sizeY, difficulty, this);
         this.myGame = myGame;
 
-        for (int i = 0; i < myGame.FieldList.size(); i++) {
-            tilePane.getChildren().add(myGame.FieldList.get(i).button);
+        for (int i = 0; i < myGame.getFieldList().size(); i++) {
+            tilePane.getChildren().add(myGame.getFieldList().get(i).getButton());
         }
         tilePane.setPrefColumns(sizeX);
         tilePane.setAlignment(Pos.CENTER);

@@ -9,12 +9,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class Field {
-    private static ArrayList<Field> FieldList;
-    private static int maxMultiOpen = 1;
     private static int openedThisTurn = 0;
-    public final int coordX;
-    public final int coordY;
-    public Button button;
+    private final int coordX;
+    private final int coordY;
+    private final Button button;
     private int value;
     final private ArrayList<Field> neigbours;
     final private ArrayList<Field> cardinalNeigbours;
@@ -40,7 +38,8 @@ public class Field {
         });
         button.setMinSize(35, 35);
         button.setMaxSize(35, 35);
-        button.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));  //StackOverflow
+        button.setBorder(new Border(new BorderStroke(Color.BLACK, BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        //Bei der obigen Zeile handelt es sich um FremdCode
         value = 0;
         neigbours = new ArrayList<>();
         cardinalNeigbours = new ArrayList<>();
@@ -48,6 +47,10 @@ public class Field {
     }
 
     public int getValue() {return value;}
+
+    public Button getButton() {
+        return button;
+    }
 
     private void fieldRightClicked() {
         if (myGame.getOpenedFields().contains(this)) return;
@@ -66,27 +69,16 @@ public class Field {
             myGame.getFlaggedFields().remove(this);
         }
     }
-    private void fieldClicked() {       //FIXME Hack to make sure openedThisTurn can be reset, replace with better idea
+    private void fieldClicked() {
         if (myGame.getOpenedFields().contains(this)) return;
-        fieldActivated();               //TODO show7
+        fieldActivated();               //MultiOpen and thus the recursive function happens here
         openedThisTurn = 0;             //All this happens *after* the multiOpen
         if(myGame.checkLose()) {
             myGame.lose();
         }
     }
-
-    public static void setMaxToOpen() {     //Sets how many Fields can be opened at once    //TODO show3
-        float temp = FieldList.size() / 10f;
-        for (int i = 0;; i++) {
-            if (temp > (float)maxMultiOpen){
-                maxMultiOpen = maxMultiOpen + i*4;
-            }
-            else break;
-        }
-    }
-
-    public void fieldActivated() {        //FIXME Change this back to private once open all is no longer needed // Or don't?
-        openedThisTurn++;                 //TODO show8
+    private void fieldActivated() { //Field was clicked, and we might want to open multiple fields
+        openedThisTurn++;
         if (value == -1){
             button.setText("⬤");
             button.setStyle(MyStyles.blackColorFont + MyStyles.boldFont + MyStyles.openedColorBG);
@@ -96,13 +88,13 @@ public class Field {
             button.setText("");
             button.setStyle(MyStyles.openedColorBG);
             myGame.getOpenedFields().add(this);
-            openMass();
+            openMulti();
         }
         else if (value == 1){
             button.setText(Integer.toString(value));
             button.setStyle(MyStyles.openedColorBG + MyStyles.boldFont + MyStyles.oneColorFont);
             myGame.getOpenedFields().add(this);
-            openMass();
+            openMulti();
         }
         else if (value == 2){
             button.setText(Integer.toString(value));
@@ -116,19 +108,19 @@ public class Field {
         }
     }
 
-    private void openMass() {
-        float share = (float)myGame.getOpenedFields().size() / (float)FieldList.size();
+    private void openMulti() {
+        float share = (float)myGame.getOpenedFields().size() / (float)myGame.getFieldList().size();
         if (share > 0.5){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
-            maxMultiOpen = 0;
+            myGame.setMaxToOpen(0);
         }
-        else if (openedThisTurn >= maxMultiOpen){
+        else if (openedThisTurn >= myGame.getMaxToOpen()){
             return; //TODO Consider rewriting this to avoid warning
         }
         else {
             for (Field cardinalNeigbour : cardinalNeigbours) {
                 if (cardinalNeigbour.value != -1) {       //if Cardinal neighbour is *not* a bomb
                     if ((!myGame.getOpenedFields().contains(cardinalNeigbour)) && (!myGame.getFlaggedFields().contains(cardinalNeigbour))) { //if cardinalNeighbour is *not* already open or flagged
-                        cardinalNeigbour.fieldActivated();  //TODO check if this check is redundant //TODO Consider rewriting this with temp var currentNeighbour
+                        cardinalNeigbour.fieldActivated();
                         myGame.getOpenedFields().add(this);
                     }
                 }
@@ -138,15 +130,15 @@ public class Field {
     }
 
     private Field getFieldOffsetFromThis(int XOffset, int YOffset){
-        for (Field field : FieldList) {
-            if ((field.coordX == (coordX + XOffset)) && (field.coordY == (coordY + YOffset))) {
+        for (Field field : myGame.getFieldList()) {
+            if ((field.coordX == (this.coordX + XOffset)) && (field.coordY == (this.coordY + YOffset))) {
                 return field;
             }
         }
-        return null;        //TODO: Is this legal?
+        return null;
     }
 
-    public void findNeigbours(){                                        //TODO show4
+    public void findNeigbours(){
 
         neigbours.add(getFieldOffsetFromThis(-1, -1));
         neigbours.add(getFieldOffsetFromThis(-1, 0));
@@ -169,13 +161,6 @@ public class Field {
 
     public ArrayList<Field> getNeigbours() {
         return neigbours;
-    }
-
-    public static void setFieldList(ArrayList<Field> fieldList) {
-        FieldList = fieldList;
-    }
-    public static ArrayList<Field> getFieldList(){
-        return FieldList;
     }
 
     public void incrementValue() {
