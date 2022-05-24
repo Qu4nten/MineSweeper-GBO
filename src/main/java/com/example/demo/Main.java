@@ -15,12 +15,10 @@ import javafx.scene.text.Font;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
-import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static javafx.geometry.Pos.BASELINE_CENTER;
-import static javafx.geometry.Pos.CENTER_LEFT;
 
 public class Main extends Application {
 
@@ -34,7 +32,7 @@ public class Main extends Application {
     private Game myGame;
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage primaryStage){
 
         stage = primaryStage;
 
@@ -77,9 +75,7 @@ public class Main extends Application {
         TimerTask updateTimeLabel = new TimerTask() {
             @Override
             public void run() {
-                Platform.runLater(() ->{
-                    myGame.updateTimeLabel();
-                });
+                Platform.runLater(myGame::updateTimeLabel);
             }
         };
         Timer labelTimer = new Timer();
@@ -109,7 +105,7 @@ public class Main extends Application {
                         "14 :  9",
                         "24 : 17"
                 );
-        final ComboBox comboBoxSize = new ComboBox(optionsSize);
+        ComboBox<String> comboBoxSize = new ComboBox<>(optionsSize);
         comboBoxSize.getSelectionModel().selectFirst();
         comboBoxSize.setStyle("-fx-font: 30px \"Impact\";");
 
@@ -123,7 +119,7 @@ public class Main extends Application {
                         "Medium",
                         "Hard"
                 );
-        final ComboBox comboBoxDifficulty = new ComboBox(options);
+        ComboBox<String> comboBoxDifficulty = new ComboBox<>(options);
         comboBoxDifficulty.getSelectionModel().selectFirst();
         comboBoxDifficulty.setStyle("-fx-font: 30px \"Impact\";");
         hbox1.getChildren().add(comboBoxDifficulty);

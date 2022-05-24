@@ -8,14 +8,14 @@ import java.time.Instant;
 import java.util.*;
 
 public class Game {
-    private static Set<Field> bombSet = new HashSet<>();
+    private static final Set<Field> bombSet = new HashSet<>();
     public final int sizeX;     //Set to private
     public final int sizeY;
     private final int difficulty;
     private final int bombCount;
     public ArrayList<Field> FieldList;
-    private Set<Field> flaggedFields = new HashSet<>();
-    private Set<Field> openedFields = new HashSet<>();
+    private final Set<Field> flaggedFields = new HashSet<>();
+    private final Set<Field> openedFields = new HashSet<>();
     private Label timeLabel;
     private Label flagLabel;
     private final Instant startTime = Instant.now();
@@ -29,30 +29,16 @@ public class Game {
         FieldList = new ArrayList<>();
         timeLabel = new Label();
         Random rand = new Random();
-        float difficultyMultiplier = 1;
-        switch (difficulty){
-            case 0:
-                difficultyMultiplier = 0.8f;
-                break;
-            case 1:
-                difficultyMultiplier = 1f;
-                break;
-            case 2:
-                difficultyMultiplier = 1.2f;
-                break;
-            default:
-                difficultyMultiplier = 1f;
-        }
-        bombCount = (int) Math.floor((Math.floor((x*y)/7) + rand.nextInt((int) Math.floor((x*y)/40)))*difficultyMultiplier) ;
-
+        float difficultyMultiplier = switch (difficulty) {
+            case 0  -> 0.8f;
+            case 1  -> 1f;
+            case 2  -> 1.2f;
+            default -> 1f;
+        };
+        if(1==1){bombCount = (int) Math.floor((Math.floor((x*y)/7f) + rand.nextInt((int) Math.floor((x*y)/40f)))*difficultyMultiplier);}
+        else {bombCount = 2;}//TODO Debug Purposes
         createLabels();
-
-        //bombCount = 2; //TODO Debug Purposes, remove later
         createField(sizeX, sizeY);
-
-
-
-
     }
 
     public Set<Field> getOpenedFields() {
@@ -75,7 +61,7 @@ public class Game {
     }
 
     private void createLabels() {
-        flagLabel = new Label("\uD83D\uDEA9" + Integer.toString(bombCount));
+        flagLabel = new Label("\uD83D\uDEA9" + bombCount);
         flagLabel.setPadding(new Insets(0, 50, 0, 50 ));
         flagLabel.setFont(new Font("Impact", 25));
 
@@ -118,9 +104,9 @@ public class Game {
     }
 
     private void assignFieldValues(ArrayList<Integer> bombPositions){          //TODO show6
-        for (int i = 0; i < bombPositions.size(); i++) {    //TODO Replace with enhanced for loop
-            for (int j = 0; j < Field.getFieldList().get(bombPositions.get(i)).getNeigbours().size(); j++) {
-                Field.getFieldList().get(bombPositions.get(i)).getNeigbours().get(j).incrementValue();
+        for (Integer bombPosition : bombPositions) {    //TODO Replace with enhanced for loop
+            for (int j = 0; j < Field.getFieldList().get(bombPosition).getNeigbours().size(); j++) {
+                Field.getFieldList().get(bombPosition).getNeigbours().get(j).incrementValue();
             }   //Get Current Field with Bomb, get all neighbours, iterate over these and increment
         }
     }
@@ -143,8 +129,8 @@ public class Game {
         for (Field i: bombSet) {    //TODO Debug Purposes
             System.out.println(i.coordX + "\t" + i.coordY);
         }
-        for (int i = 0; i < bombPositions.size(); i++) {
-            FieldList.get(bombPositions.get(i)).placeBomb();
+        for (Integer bombPosition : bombPositions) {
+            FieldList.get(bombPosition).placeBomb();
         }
 
 
@@ -158,9 +144,8 @@ public class Game {
     }
     public int getCorrectlyFlagged() {
         int correctlyFlagged = 0;
-        Iterator<Field> flaggedIterator = flaggedFields.iterator();
-        while(flaggedIterator.hasNext()) {
-            if (flaggedIterator.next().getValue() == -1) {
+        for (Field flaggedField : flaggedFields) {
+            if (flaggedField.getValue() == -1) {
                 correctlyFlagged++;
             }
         }
@@ -174,9 +159,8 @@ public class Game {
     }
 
     public boolean checkLose() {
-        Iterator<Field> fieldIterator = openedFields.iterator();
-        while (fieldIterator.hasNext()){
-            if (fieldIterator.next().getValue() == -1){
+        for (Field openedField : openedFields) {
+            if (openedField.getValue() == -1) {
                 return true;
             }
         }

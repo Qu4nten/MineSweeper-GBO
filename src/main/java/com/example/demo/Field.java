@@ -7,22 +7,19 @@ import javafx.scene.paint.Color;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
 
 public class Field {
     private static ArrayList<Field> FieldList;
     private static int maxMultiOpen = 1;
-    private static Set<Field> openedFields = new HashSet<>(); //I chose a Set here to prevent Duplicates
     private static int openedThisTurn = 0;
     public final int coordX;
     public final int coordY;
     public Button button;
     private int value;
-    private ArrayList<Field> neigbours;
-    private ArrayList<Field> cardinalNeigbours;
+    final private ArrayList<Field> neigbours;
+    final private ArrayList<Field> cardinalNeigbours;
     private boolean flagged = false;
-    private Game myGame;
+    final private Game myGame;
 
 
     Field(int x, int y, Game myGame){
@@ -62,7 +59,7 @@ public class Field {
             myGame.updateFlagLabel();
             myGame.checkWin();
         }
-        else if (flagged){
+        else{
             button.setText("");
             button.setStyle(MyStyles.closedColorBG);
             flagged = false;
@@ -79,21 +76,13 @@ public class Field {
     }
 
     public static void setMaxToOpen() {     //Sets how many Fields can be opened at once    //TODO show3
-        float temp = FieldList.size() / 10;
+        float temp = FieldList.size() / 10f;
         for (int i = 0;; i++) {
             if (temp > (float)maxMultiOpen){
                 maxMultiOpen = maxMultiOpen + i*4;
             }
             else break;
         }
-    }
-
-    private void updateCss(){
-        /*
-        one for every value from 0-4
-        one for every border setting
-         */
-
     }
 
     public void fieldActivated() {        //FIXME Change this back to private once open all is no longer needed // Or don't?
@@ -127,20 +116,19 @@ public class Field {
         }
     }
 
-    private void openMass() {               //TODO show9
+    private void openMass() {
         float share = (float)myGame.getOpenedFields().size() / (float)FieldList.size();
         if (share > 0.5){   //If more than 60% of tiles have been opened we quit opening multiple for the rest of the game
             maxMultiOpen = 0;
-            return;
         }
-        else if (openedThisTurn >= maxMultiOpen){      //TODO This needs to compare to a proper temp variable "(int) openedThisTurn"
-            return;
+        else if (openedThisTurn >= maxMultiOpen){
+            return; //TODO Consider rewriting this to avoid warning
         }
         else {
-            for (int i = 0; i < cardinalNeigbours.size(); i++) {
-                if(cardinalNeigbours.get(i).value != -1){       //if Cardinal neighbour is *not* a bomb
-                    if((!myGame.getOpenedFields().contains(cardinalNeigbours.get(i))) && (!myGame.getFlaggedFields().contains(cardinalNeigbours.get(i)))) { //if cardinalNeighbour is *not* already open or flagged
-                        cardinalNeigbours.get(i).fieldActivated();  //TODO check if this check is redundant //TODO Consider rewriting this with temp var currentNeighbour
+            for (Field cardinalNeigbour : cardinalNeigbours) {
+                if (cardinalNeigbour.value != -1) {       //if Cardinal neighbour is *not* a bomb
+                    if ((!myGame.getOpenedFields().contains(cardinalNeigbour)) && (!myGame.getFlaggedFields().contains(cardinalNeigbour))) { //if cardinalNeighbour is *not* already open or flagged
+                        cardinalNeigbour.fieldActivated();  //TODO check if this check is redundant //TODO Consider rewriting this with temp var currentNeighbour
                         myGame.getOpenedFields().add(this);
                     }
                 }
@@ -150,9 +138,9 @@ public class Field {
     }
 
     private Field getFieldOffsetFromThis(int XOffset, int YOffset){
-        for (int i = 0; i < FieldList.size(); i++) {
-            if((FieldList.get(i).coordX == (coordX + XOffset))&&(FieldList.get(i).coordY == (coordY + YOffset))) {
-                return FieldList.get(i);
+        for (Field field : FieldList) {
+            if ((field.coordX == (coordX + XOffset)) && (field.coordY == (coordY + YOffset))) {
+                return field;
             }
         }
         return null;        //TODO: Is this legal?
@@ -199,39 +187,4 @@ public class Field {
     public void placeBomb() {
         value = -1;
     }
-    public static void openAll(){
-        for (int i = 0; i < FieldList.size(); i++) {
-            FieldList.get(i).fieldActivated();
-        }
-    }
-
-    /*public void findBorderPosition() {      //Discerns if Field is at border according to existing Fields in vicinity
-        if ((getFieldOffsetFromThis(-1, 0) == null) && (getFieldOffsetFromThis(0,-1) == null)) {
-            borderPos = Position.TOP_LEFT;
-        }
-        else if ((getFieldOffsetFromThis(1, 0) == null) && (getFieldOffsetFromThis(0,-1) == null)) {
-            borderPos = Position.TOP_RIGHT;
-        }
-        else if ((getFieldOffsetFromThis(1, 0) == null) && (getFieldOffsetFromThis(0,1) == null)) {
-            borderPos = Position.BOTTOM_RIGHT;
-        }
-        else if ((getFieldOffsetFromThis(-1, 0) == null) && (getFieldOffsetFromThis(0,1) == null)) {
-            borderPos = Position.BOTTOM_LEFT;
-        }
-        else if (getFieldOffsetFromThis(0, -1) == null) {
-            borderPos = Position.TOP;
-        }
-        else if (getFieldOffsetFromThis(1, 0) == null) {
-            borderPos = Position.RIGHT;
-        }
-        else if (getFieldOffsetFromThis(0, 1) == null) {
-            borderPos = Position.BOTTOM;
-        }
-        else if (getFieldOffsetFromThis(-1, 0) == null) {
-            borderPos = Position.LEFT;
-        }
-        else {
-            borderPos = Position.CENTER;
-        }
-    }*/
 }
