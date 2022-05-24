@@ -1,6 +1,7 @@
 package com.example.demo;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
@@ -11,11 +12,15 @@ import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Circle;
 import javafx.scene.text.Font;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static javafx.geometry.Pos.BASELINE_CENTER;
+import static javafx.geometry.Pos.CENTER_LEFT;
 
 public class Main extends Application {
 
@@ -26,7 +31,7 @@ public class Main extends Application {
 
     private Scene gamePrepScene;
 
-    private Scene gameScene;
+    private Game myGame;
 
     @Override
     public void start(Stage primaryStage) throws IOException {
@@ -47,6 +52,7 @@ public class Main extends Application {
     private void createGameSceneAndSwitch(int sizeX, int sizeY, int difficulty){
         TilePane tilePane = new TilePane();
         Game myGame = new Game(sizeX, sizeY, difficulty, this);
+        this.myGame = myGame;
 
         for (int i = 0; i < myGame.FieldList.size(); i++) {
             tilePane.getChildren().add(myGame.FieldList.get(i).button);
@@ -55,21 +61,31 @@ public class Main extends Application {
         tilePane.setAlignment(Pos.CENTER);
         tilePane.setHgap(0);
         tilePane.setVgap(0);
-        tilePane.setStyle("-fx-border-color: black");
+        tilePane.setStyle(MyStyles.borderColorBlack);
         tilePane.setPadding(new Insets(10, 10, 10 ,10));
         VBox fieldButtonVBox = new VBox();
         fieldButtonVBox.getChildren().add(tilePane);
         fieldButtonVBox.setFillWidth(false);
         fieldButtonVBox.setAlignment(Pos.CENTER);
 
-        HBox labelHBox = new HBox();
-        for (int i = 0; i < myGame.debugLabels.size(); i++) {
-            labelHBox.getChildren().add(myGame.debugLabels.get(i));
-        }
-        labelHBox.setAlignment(Pos.TOP_CENTER);
-        labelHBox.setMinHeight(100);
+        HBox labelBox = new HBox();
+        labelBox.getChildren().add(myGame.getFlagLabel());
+        labelBox.getChildren().add(myGame.getTimeLabel());
+        labelBox.setAlignment(Pos.TOP_CENTER);
+        labelBox.setMinHeight(100);
 
-        VBox vbox = new VBox(labelHBox, fieldButtonVBox);
+        TimerTask updateTimeLabel = new TimerTask() {
+            @Override
+            public void run() {
+                Platform.runLater(() ->{
+                    myGame.updateTimeLabel();
+                });
+            }
+        };
+        Timer labelTimer = new Timer();
+        labelTimer.scheduleAtFixedRate(updateTimeLabel, 0, 1000);
+
+        VBox vbox = new VBox(labelBox, fieldButtonVBox);
         vbox.setAlignment(Pos.CENTER);
         vbox.setPadding(new Insets(10,10,10,10));
         Scene GameScene = new Scene(vbox, 960, 720);
@@ -82,7 +98,7 @@ public class Main extends Application {
         button1.setOnAction(e-> switchScenes(mainScene));
 
         Label labelPL = new Label("PLAY!");
-        labelPL.setFont(new Font("Comic Sans MS", 50));
+        labelPL.setFont(new Font(MyStyles.fontGeneral, 50));
         labelPL.setTextFill(Color.web("Red"));
 
         Label labelSZ = new Label("Size:");
@@ -135,19 +151,78 @@ public class Main extends Application {
     }
 
     public void createPostGameSceneAndSwitch(boolean state){
+        VBox vbox = new VBox();
 
+        Label labelOutcome = new Label("YOU LOSE");
+        if(state){labelOutcome.setText("YOU WIN");}
+        labelOutcome.setPadding(new Insets(0,0,50,0));
+        labelOutcome.setFont(new Font(MyStyles.fontGeneral, 100));
+
+
+
+        HBox statsHBox = new HBox(125);
+        VBox statsLeftVBox = new VBox();
+        VBox statsRightVBox = new VBox();
+
+        statsHBox.setAlignment(Pos.CENTER);
+
+
+        Label labelTotalBombs = new Label("TOTAL BOMBS:");
+        labelTotalBombs.setFont(new Font(MyStyles.fontGeneral, 30));
+
+        Label labelTotalBombsVar = new Label(Integer.toString(myGame.getBombCount()));
+        labelTotalBombsVar.setFont(new Font(MyStyles.fontGeneral, 30));
+
+
+        Label labelBombsFound = new Label("BOMBS FOUND:");
+        labelBombsFound.setFont(new Font(MyStyles.fontGeneral, 30));
+
+        Label labelBombsFoundVar = new Label(Integer.toString(myGame.getCorrectlyFlagged()));
+        labelBombsFoundVar.setFont(new Font(MyStyles.fontGeneral, 30));
+
+
+        Label labelTime = new Label("TIME:");
+        labelTime.setFont(new Font(MyStyles.fontGeneral, 30));
+
+        Label labelTimeVar = new Label(myGame.getGameTime());
+        labelTimeVar.setFont(new Font(MyStyles.fontGeneral, 30));
+
+
+        Label labelDifficulty = new Label("DIFFICULTY:");
+        labelDifficulty.setFont(new Font(MyStyles.fontGeneral, 30));
+
+        Label labelDifficultyVar = new Label(myUtility.getDifficulty(myGame.getDifficulty()));
+        labelDifficultyVar.setFont(new Font(MyStyles.fontGeneral, 30));
+
+        statsLeftVBox.getChildren().addAll(labelTotalBombs, labelBombsFound, labelTime, labelDifficulty);
+        statsRightVBox.getChildren().addAll(labelTotalBombsVar, labelBombsFoundVar, labelTimeVar, labelDifficultyVar);
+        statsHBox.getChildren().addAll(statsLeftVBox, statsRightVBox);
+
+
+        Button buttonReturnMain = new Button("BACK TO MAIN");
+        buttonReturnMain.setFont(new Font(MyStyles.fontGeneral, 60));
+        buttonReturnMain.setPadding(new Insets(20, 40, 20, 40));
+        buttonReturnMain.setTextAlignment(TextAlignment.CENTER);
+        buttonReturnMain.setOnAction(e-> switchScenes(mainScene));
+        VBox.setMargin(buttonReturnMain, new Insets(50, 0, 20, 0));
+
+
+        vbox.setAlignment(Pos.CENTER);
+        vbox.getChildren().addAll(labelOutcome, statsHBox, buttonReturnMain);
+        Scene postGameScene = new Scene(vbox, 960, 720);
+        switchScenes(postGameScene);
     }
     private Scene createMainScene() {
         double r=50;
 
         Label labelMS = new Label("MINESWEEPER");
-        labelMS.setFont(new Font("Comic Sans MS", 50));
+        labelMS.setFont(new Font(MyStyles.fontGeneral, 50));
         labelMS.setTextFill(Color.web("Red"));
 
         Button button1 = new Button();
         button1.setText("PLAY");
         button1.setMaxWidth(Double.MAX_VALUE);
-        button1.setFont(new Font("Comic Sans MS", 30));
+        button1.setFont(new Font(MyStyles.fontGeneral, 30));
         //button1.setMaxHeight(Double.MAX_VALUE);
         VBox.setVgrow(button1, Priority.ALWAYS);
         button1.setShape(new Circle(r));
@@ -157,7 +232,7 @@ public class Main extends Application {
 
         Button button2 = new Button();
         button2.setText("LEADERBOARD");
-        button2.setFont(new Font("Comic Sans MS", 30));
+        button2.setFont(new Font(MyStyles.fontGeneral, 30));
         button2.setMaxWidth(Double.MAX_VALUE);
         button2.setShape(new Circle(r));
         button2.setMinSize(18*r, 2*r);
@@ -166,7 +241,7 @@ public class Main extends Application {
 
         Button button3 = new Button();
         button3.setText("TUTORIAL");
-        button3.setFont(new Font("Comic Sans MS", 30));
+        button3.setFont(new Font(MyStyles.fontGeneral, 30));
         button3.setMaxWidth(Double.MAX_VALUE);
         button3.setShape(new Circle(r));
         button3.setMinSize(18*r, 2*r);
@@ -181,7 +256,7 @@ public class Main extends Application {
         VBox.setMargin(labelMS, new Insets(0, 10, 0, 10));
         //                                  (top, right, bottom, left)
 
-        layout.setStyle("-fx-padding: 16;");
+        layout.setStyle(MyStyles.padding16);
         layout.setSpacing(50);
 
 

@@ -1,6 +1,10 @@
 package com.example.demo;
+import javafx.geometry.Insets;
 import javafx.scene.control.Label;
+import javafx.scene.text.Font;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.*;
 
 public class Game {
@@ -8,9 +12,12 @@ public class Game {
     public final int sizeX;     //Set to private
     public final int sizeY;
     private final int difficulty;
-    public final int bombCount;
+    private final int bombCount;
     public ArrayList<Field> FieldList;
     public static ArrayList<Label> debugLabels;
+    private Label timeLabel;
+    private Label flagLabel;
+    private final Instant startTime = Instant.now();
     private static Main myController;
 
     Game(int x, int y, int diffi, Main myCtr){
@@ -19,8 +26,26 @@ public class Game {
         difficulty = diffi;
         myController = myCtr;
         FieldList = new ArrayList<>();
+        timeLabel = new Label();
         Random rand = new Random();
-        bombCount = (int) Math.floor((x*y)/7) + rand.nextInt((int) Math.floor((x*y)/40));
+        float difficultyMultiplier = 1;
+        switch (difficulty){
+            case 0:
+                difficultyMultiplier = 0.8f;
+                break;
+            case 1:
+                difficultyMultiplier = 1f;
+                break;
+            case 2:
+                difficultyMultiplier = 1.2f;
+                break;
+            default:
+                difficultyMultiplier = 1f;
+        }
+        bombCount = (int) Math.floor((Math.floor((x*y)/7) + rand.nextInt((int) Math.floor((x*y)/40)))*difficultyMultiplier) ;
+
+        createLabels();
+
         //bombCount = 2; //TODO Debug Purposes, remove later
         createField(sizeX, sizeY);
 
@@ -30,6 +55,45 @@ public class Game {
         debugLabels.add(new Label("Total Flags:\t"));
         debugLabels.add(new Label("Currently Opened: 0\t"));
         debugLabels.add(new Label("Ratio Opened:\t"));
+
+
+    }
+
+    public String getGameTime() {
+        return Long.toString(Duration.between(startTime, Instant.now()).toSeconds());
+    }
+    public int getBombCount() {
+        return bombCount;
+    }
+
+    public int getDifficulty() {
+        return difficulty;
+    }
+
+    private void createLabels() {
+        flagLabel = new Label("\uD83D\uDEA9" + Integer.toString(bombCount));
+        flagLabel.setPadding(new Insets(0, 50, 0, 50 ));
+        flagLabel.setFont(new Font("Impact", 25));
+
+
+        timeLabel = new Label();
+        timeLabel.setPadding(new Insets(0, 50, 0, 50 ));
+        timeLabel.setFont(new Font("Impact", 25));
+    }
+    public Label getTimeLabel() {
+        return timeLabel;
+    }
+
+    public Label getFlagLabel() {
+        return flagLabel;
+    }
+    public void updateTimeLabel() {
+        String timePassed = Long.toString(Duration.between(startTime, Instant.now()).toSeconds());
+        timeLabel.setText(timePassed);
+    }
+    public void updateFlagLabel() {
+        int flagsToSet = bombCount - Field.getFlaggedFields().size();
+        flagLabel.setText("\uD83D\uDEA9" + flagsToSet);
     }
 
     private void createField(int sizeX, int sizeY) {        //TODO show2
@@ -88,6 +152,16 @@ public class Game {
         }
 
     }
+    public int getCorrectlyFlagged() {
+        int correctlyFlagged = 0;
+        Iterator<Field> flaggedIterator = Field.getFlaggedFields().iterator();
+        while(flaggedIterator.hasNext()) {
+            if (flaggedIterator.next().getValue() == -1) {
+                correctlyFlagged++;
+            }
+        }
+        return correctlyFlagged;
+    }
 
     private static void win() {
 
@@ -107,6 +181,7 @@ public class Game {
     }
 
     public void lose() {
+        System.out.println("You lose");
         myController.createPostGameSceneAndSwitch(false);
     }
 }

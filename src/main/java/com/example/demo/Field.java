@@ -50,7 +50,6 @@ public class Field {
         cardinalNeigbours = new ArrayList<>();
         this.myGame = myGame;
     }
-
     public static Set<Field> getFlaggedFields() {
         return flaggedFields;
     }
@@ -61,9 +60,10 @@ public class Field {
         if (openedFields.contains(this)) return;
         if (!flagged) {
             button.setText("\uD83D\uDEA9");
-            button.setStyle(MyStyles.closedColorBG + MyStyles.redColorFont + MyStyles.boldFont);
+            button.setStyle(MyStyles.closedColorBG + MyStyles.threePlusColorFont + MyStyles.boldFont);
             flagged = true;
             flaggedFields.add(this);
+            myGame.updateFlagLabel();
             myGame.checkWin();
         }
         else if (flagged){
@@ -148,8 +148,8 @@ public class Field {
         else {
             for (int i = 0; i < cardinalNeigbours.size(); i++) {
                 if(cardinalNeigbours.get(i).value != -1){       //if Cardinal neighbour is *not* a bomb
-                    if(!openedFields.contains(cardinalNeigbours.get(i))) { //if cardinalNeighbour is *not* already open
-                        cardinalNeigbours.get(i).fieldActivated();  //TODO check if this check is redundant
+                    if((!openedFields.contains(cardinalNeigbours.get(i))) && (!flaggedFields.contains(cardinalNeigbours.get(i)))) { //if cardinalNeighbour is *not* already open or flagged
+                        cardinalNeigbours.get(i).fieldActivated();  //TODO check if this check is redundant //TODO Consider rewriting this with temp var currentNeighbour
                         openedFields.add(this);
                     }
                 }
